@@ -1,0 +1,17 @@
+# Ignore environment variables
+.env
+
+# Ignore virtual environment
+venv/
+
+# Ignore compiled Python files
+__pycache__/
+
+# Ignore log files and cache
+*.log
+
+# Ignore VS Code workspace settings (optional)
+.vscode/
+
+# Ignore deployment files (optional)
+serverless.yml
