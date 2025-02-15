@@ -1,0 +1,66 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+
+Description: FastAPI on AWS Lambda with AWS SAM
+
+Globals:
+  Function:
+    Timeout: 30
+    MemorySize: 512
+
+Resources:
+  FastAPIFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: FastAPIBackend
+      Handler: handler.lambda_handler
+      Runtime: python3.9 
+      CodeUri: .
+      Environment:
+        Variables:
+          MONGODB_URL: !Sub "{{resolve:ssm:/fastapi/mongodb_url}}"
+          OPENAI_API_KEY: !Sub "{{resolve:ssm:/fastapi/openai_api_key}}"
+      Policies:
+        - Statement:
+            - Effect: Allow
+              Action:
+                - ssm:GetParameter
+              Resource: !Sub "arn:aws:ssm:${AWS::Region}:${AWS::AccountId}:parameter/fastapi/jwt_secret_key"
+      Events:
+        ApiEvent:
+          Type: Api
+          Properties:
+            RestApiId: !Ref FastAPIAPI 
+            Path: /{proxy+}
+            Method: ANY
+
+  FastAPIAPI:
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: FastAPIBackendApi
+      StageName: Prod
+      Cors:  
+        AllowMethods: "'*'"
+        AllowHeaders: "'*'"
+        AllowOrigin: "'*'"
+      DefinitionBody:
+        swagger: "2.0"
+        info:
+          title: "FastAPIBackend"
+        paths:
+          /{proxy+}:
+            x-amazon-apigateway-any-method:
+              consumes:
+                - "application/json"
+              produces:
+                - "application/json"
+              responses: {}
+              x-amazon-apigateway-integration:
+                uri: !Sub "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${FastAPIFunction.Arn}/invocations"
+                httpMethod: "POST"
+                type: "AWS_PROXY"
+
+Outputs:
+  FastAPIEndpoint:
+    Description: "API Gateway endpoint URL for FastAPI"
+    Value: !Sub "https://${FastAPIAPI}.execute-api.${AWS::Region}.amazonaws.com/Prod/"

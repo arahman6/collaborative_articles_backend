@@ -1,17 +1,17 @@
-# Ignore environment variables
-.env
-
-# Ignore virtual environment
+# Ignore Python virtual environment
 venv/
-
-# Ignore compiled Python files
+.env
+*.pyc
 __pycache__/
 
-# Ignore log files and cache
+# Ignore AWS SAM build files
+.aws-sam/
+samconfig.toml
+
+# Ignore logs & temporary files
 *.log
+*.tmp
+.DS_Store
 
-# Ignore VS Code workspace settings (optional)
+# Ignore VS Code settings (optional)
 .vscode/
-
-# Ignore deployment files (optional)
-serverless.yml
