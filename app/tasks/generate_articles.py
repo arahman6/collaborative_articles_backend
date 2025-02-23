@@ -29,15 +29,16 @@ async def generate_articles():
         prompt = f"Write a detailed news article about the latest trends in {sector}. It should be insightful and engaging."
 
         try:
-            response = openai.ChatCompletion.create(
-                model="gpt-4",
+            response = openai.chat.completions.create(
                 messages=[
                     {"role": "system", "content": "You are a journalist writing insightful news articles."},
                     {"role": "user", "content": prompt}
-                ]
+                ],
+                model="gpt-4o",
             )
 
             article_content = response["choices"][0]["message"]["content"]
+            
 
             article_data = {
                 "title": f"Latest {sector} Insights - {datetime.now().strftime('%B %d, %Y')}",

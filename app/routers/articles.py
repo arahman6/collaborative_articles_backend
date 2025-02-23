@@ -59,12 +59,13 @@ async def create_article():
 
     for sector in ["Tech", "Health", "Corporate", "Politics", "Youth", "Lifestyle"]:
         content = await generate_article(sector)
+        print('content: ', content)
         article_data = {
-            "title": f"Latest {sector} Insights - {datetime.now().strftime('%B %d, %Y')}",
-            "description": content,  # Renamed 'content' to 'description'
+            "title": content.split("\n\n")[0].strip("*"),
+            "description": "\n\n".join(content.split("\n\n")[1:]),  # Renamed 'content' to 'description'
             "tags": [sector],  # Changed 'sector' to a list of tags
             "img": "https://source.unsplash.com/random/800x450?{sector}",  # Added a default image
-            "authors": [],  # Placeholder for authors
+            "authors": ['AI'],  # Placeholder for authors
             "created_at": now,
             "updated_at": now
         }
