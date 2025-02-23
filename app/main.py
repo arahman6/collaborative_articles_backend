@@ -1,4 +1,5 @@
 from fastapi import FastAPI
+# from fastapi.middleware.cors import CORSMiddleware
 from app.routers.articles import articles_router
 from app.routers.users import users_router
 from app.routers.contributions import contributions_router
@@ -16,6 +17,21 @@ JWT_SECRET_KEY = get_secret()
 
 
 app = FastAPI()
+
+# # Enable CORS
+# origins = [
+#     "http://localhost:5173",  # React Dev Server
+#     "https://www.mining4insights.com",  # Production Frontend URL
+# ]
+
+# # Enable CORS
+# app.add_middleware(
+#     CORSMiddleware,
+#     allow_origins=["*"],  
+#     allow_credentials=True,
+#     allow_methods=["*"],
+#     allow_headers=["*"],
+# )
 
 # Include all routers
 app.include_router(articles_router, prefix="/api/v1")

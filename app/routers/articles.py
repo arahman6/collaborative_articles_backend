@@ -61,8 +61,10 @@ async def create_article():
         content = await generate_article(sector)
         article_data = {
             "title": f"Latest {sector} Insights - {datetime.now().strftime('%B %d, %Y')}",
-            "content": content,
-            "sector": sector,
+            "description": content,  # Renamed 'content' to 'description'
+            "tags": [sector],  # Changed 'sector' to a list of tags
+            "img": "https://source.unsplash.com/random/800x450?{sector}",  # Added a default image
+            "authors": [],  # Placeholder for authors
             "created_at": now,
             "updated_at": now
         }
@@ -70,3 +72,4 @@ async def create_article():
 
     await db["articles"].insert_many(new_articles)
     return {"message": "Articles generated successfully!"}
+
