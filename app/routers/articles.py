@@ -64,7 +64,7 @@ async def create_article():
             "title": content.split("\n\n")[0].strip("*"),
             "description": "\n\n".join(content.split("\n\n")[1:]),  # Renamed 'content' to 'description'
             "tags": [sector],  # Changed 'sector' to a list of tags
-            "img": "https://source.unsplash.com/random/800x450?{sector}",  # Added a default image
+            "img": f"https://picsum.photos/800/450?{sector}",  # Added a default image
             "authors": ['AI'],  # Placeholder for authors
             "created_at": now,
             "updated_at": now

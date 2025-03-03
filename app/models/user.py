@@ -1,11 +1,12 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, EmailStr, Field
 from app.models.base import PyObjectId
+from typing import Optional
 
 class User(BaseModel):
-    id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-    username: str
-    email: str
-    hashed_password: str
+    id: Optional[PyObjectId] = Field(default=None, alias="_id")  # MongoDB ID
+    username: str  # Ensure username is included
+    email: EmailStr  # Ensures a valid email format
+    password: str  # Keep `password` for signup (will be hashed later)
 
     class Config:
         populate_by_name = True
@@ -14,6 +15,6 @@ class User(BaseModel):
             "example": {
                 "username": "john_doe",
                 "email": "john.doe@example.com",
-                "hashed_password": "hashedpassword123"
+                "password": "securepassword123"
             }
         }

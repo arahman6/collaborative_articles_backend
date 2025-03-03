@@ -13,7 +13,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 
 # JWT settings
-SECRET_KEY = config.JWT_SECRET_KEY
+SECRET_KEY = str(config.JWT_SECRET_KEY) 
 ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = 30
 
@@ -28,8 +28,8 @@ users_router = APIRouter()
 
 @users_router.post("/signup/")
 async def signup(user: User):
-    user_data = user.dict()
-    user_data["password"] = get_password_hash(user_data["password"])
+    user_data = user.model_dump()  
+    user_data["hashed_password"] = get_password_hash(user_data.pop("password"))  # Hash password
     existing_user = await db["users"].find_one({"email": user_data["email"]})
     if existing_user:
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -37,10 +37,31 @@ async def signup(user: User):
     result = await db["users"].insert_one(user_data)
     return {"id": str(result.inserted_id), "email": user.email}
 
+# @users_router.post("/login/")
+# async def login(form_data: OAuth2PasswordRequestForm = Depends()):
+#     user = await db["users"].find_one({"email": form_data.email})
+#     if not user or not verify_password(form_data.password, user["password"]):
+#         raise HTTPException(status_code=400, detail="Invalid credentials")
+#     return {"message": "Login successful"}
+
 @users_router.post("/login/")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await db["users"].find_one({"email": form_data.email})
-    if not user or not verify_password(form_data.password, user["password"]):
+    user = await db["users"].find_one({"email": form_data.username})
+
+    if not user or not verify_password(form_data.password, user["hashed_password"]):
         raise HTTPException(status_code=400, detail="Invalid credentials")
-    return {"message": "Login successful"}
+
+    print("SECRET_KEY type:", type(SECRET_KEY))
+    print("SECRET_KEY value:", SECRET_KEY)
+
+    access_token = jwt.encode(
+        {"sub": user["email"]},
+        SECRET_KEY, 
+        algorithm=ALGORITHM
+    )
+
+    return {"access_token": access_token, "token_type": "bearer"}
+
+
+
 
