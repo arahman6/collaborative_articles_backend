@@ -14,8 +14,8 @@ class User(BaseModel):
     bio: Optional[str] = None  # Short bio
     role: str = "contributor"  # Default role
     status: str = "active"  # Account status
-    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
     class Config:
         populate_by_name = True
@@ -32,8 +32,8 @@ class UserContact(BaseModel):
     state: Optional[str] = None
     country: Optional[str] = None
     postal_code: Optional[str] = None
-    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 
 class UserProfessional(BaseModel):
@@ -43,8 +43,8 @@ class UserProfessional(BaseModel):
     experience_years: Optional[int] = 0
     education: Optional[List[Dict[str, str]]] = []  # List of degree info
     skills: Optional[List[str]] = []  # List of skills
-    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 class UserEngagement(BaseModel):
     user_id: PyObjectId  # FK reference to User
@@ -52,13 +52,18 @@ class UserEngagement(BaseModel):
     comments_posted: int = 0
     badges: List[str] = []
     karma_score: int = 0
-    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
 
 class UserPreferences(BaseModel):
     user_id: PyObjectId  # FK reference to User
     language: Optional[str] = "English"
     theme: str = "light"
     notifications: Dict[str, bool] = {"email": True, "push": False}
-    created_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
-    updated_at: datetime = Field(default_factory=lambda: datetime.now(datetime.timezone.utc))
+    created_at: datetime = Field(default_factory=datetime.utcnow)
+    updated_at: datetime = Field(default_factory=datetime.utcnow)
+
+
+class ChangePasswordRequest(BaseModel):
+    old_password: str
+    new_password: str

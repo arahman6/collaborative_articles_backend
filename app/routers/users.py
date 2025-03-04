@@ -1,6 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from app.database import db
-from app.models.user import User
+from app.models.user import ChangePasswordRequest, User
 from datetime import datetime, timezone, timedelta
 from bson import ObjectId
 from passlib.context import CryptContext
@@ -106,19 +106,23 @@ async def update_profile(update_data: dict, current_user: dict = Depends(get_cur
     return {"message": "Profile updated successfully"}
 
 # Change Password
-@users_router.put("/change-password/", status_code=status.HTTP_200_OK)
-async def change_password(old_password: str, new_password: str, current_user: dict = Depends(get_current_user)):
+@users_router.put("/change-password/", status_code=200)
+async def change_password(
+    request: ChangePasswordRequest, 
+    current_user: dict = Depends(get_current_user)
+):
     """Change user's password"""
-    if not verify_password(old_password, current_user["hashed_password"]):
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Old password is incorrect")
+    if not verify_password(request.old_password, current_user["hashed_password"]):
+        raise HTTPException(status_code=400, detail="Old password is incorrect")
 
-    new_hashed_password = get_password_hash(new_password)
+    new_hashed_password = get_password_hash(request.new_password)
     await db["users"].update_one(
         {"_id": current_user["_id"]},
         {"$set": {"hashed_password": new_hashed_password}}
     )
-    
+
     return {"message": "Password changed successfully"}
+
 
 # Delete User Account
 @users_router.delete("/delete-account/", status_code=status.HTTP_200_OK)
