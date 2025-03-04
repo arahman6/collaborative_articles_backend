@@ -37,12 +37,6 @@ async def signup(user: User):
     result = await db["users"].insert_one(user_data)
     return {"id": str(result.inserted_id), "email": user.email}
 
-# @users_router.post("/login/")
-# async def login(form_data: OAuth2PasswordRequestForm = Depends()):
-#     user = await db["users"].find_one({"email": form_data.email})
-#     if not user or not verify_password(form_data.password, user["password"]):
-#         raise HTTPException(status_code=400, detail="Invalid credentials")
-#     return {"message": "Login successful"}
 
 @users_router.post("/login/")
 async def login(form_data: OAuth2PasswordRequestForm = Depends()):
