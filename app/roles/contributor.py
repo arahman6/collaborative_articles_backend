@@ -1,4 +1,4 @@
-from roles.role_interface import UserRole
+from app.roles.role_interface import UserRole
 
 class Contributor(UserRole):
     """Contributor role - can create and edit, but not delete."""

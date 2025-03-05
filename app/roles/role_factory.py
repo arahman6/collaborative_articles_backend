@@ -1,6 +1,6 @@
-from roles.admin import Admin
-from roles.contributor import Contributor
-from roles.reader import Reader
+from app.roles.admin import Admin
+from app.roles.contributor import Contributor
+from app.roles.reader import Reader
 
 class UserRoleFactory:
     """Factory to return role classes based on user role string."""

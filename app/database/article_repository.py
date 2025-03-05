@@ -23,6 +23,10 @@ class ArticleRepository:
     @staticmethod
     async def find_by_id(article_id: str):
         """Find an article by ID."""
+        try:
+            object_id = ObjectId(article_id)  
+        except:
+            raise ValueError("Invalid article ID format")
         return await db["articles"].find_one({"_id": ObjectId(article_id)})
 
     @staticmethod

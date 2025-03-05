@@ -4,7 +4,7 @@ from app.models.user import User
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 from app.services.auth_service import AuthService
 from pydantic import BaseModel
-from roles.role_factory import UserRoleFactory
+from app.roles.role_factory import UserRoleFactory
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 users_router = APIRouter()

@@ -1,4 +1,4 @@
-from roles.role_interface import UserRole
+from app.roles.role_interface import UserRole
 
 class Admin(UserRole):
     """Admin role - has full permissions."""

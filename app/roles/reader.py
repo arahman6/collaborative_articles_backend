@@ -1,4 +1,4 @@
-from roles.role_interface import UserRole
+from app.roles.role_interface import UserRole
 
 class Reader(UserRole):
     """Reader role - can only view, no editing or creating."""

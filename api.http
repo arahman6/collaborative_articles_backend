@@ -1,0 +1,22 @@
+### Get All Articles with Stored Token
+GET http://127.0.0.1:8000/api/v1/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqb2huZG9lQGV4YW1wbGUuY29tIiwiZXhwIjoxNzQxMTcxNTgwfQ.vnd7_7QCD2RU4iRxnVLeqtPYI6dRWBEOWn-XOceCizQ
+
+
+###
+# Create a new user
+POST http://127.0.0.1:8000/api/v1/signup/
+Content-Type: application/json
+
+{
+    "username": "johndoe",
+    "email": "johndoe@example.com",
+    "password": "SecurePass123"
+}
+
+### Login and Save Token
+POST http://127.0.0.1:8000/api/v1/login/
+Content-Type: application/x-www-form-urlencoded
+
+username=johndoe@example.com&password=SecurePass123

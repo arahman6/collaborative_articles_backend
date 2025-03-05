@@ -8,7 +8,7 @@ from app.database.user_repository import UserRepository
 from app.services.article_generator_service import ArticleGeneratorService
 from app.services.auth_service import AuthService
 from fastapi.security import OAuth2PasswordBearer
-from roles.role_factory import UserRoleFactory
+from app.roles.role_factory import UserRoleFactory
 
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 articles_router = APIRouter()
