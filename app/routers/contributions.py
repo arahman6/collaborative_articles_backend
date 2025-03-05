@@ -1,51 +1,49 @@
-from fastapi import APIRouter, HTTPException
-from app.database import db
-from app.models import Contribution
-from datetime import datetime, timezone
-from bson import ObjectId
+from fastapi import APIRouter, HTTPException, Depends, status
+from app.database.contribution_repository import ContributionRepository
+from app.database.article_repository import ArticleRepository
+from app.database.user_repository import UserRepository
+from app.services.auth_service import AuthService
+from fastapi.security import OAuth2PasswordBearer
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 contributions_router = APIRouter()
 
-# Create a new contribution
-@contributions_router.post("/contributions/")
-async def add_contribution(article_id: str, contribution: Contribution):
-    contribution_data = contribution.dict()
-    contribution_data["article_id"] = article_id
-    contribution_data["created_at"] = datetime.now(timezone.utc)
-    result = await db["contributions"].insert_one(contribution_data)
-    return {"id": str(result.inserted_id)}
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    """Retrieve the currently authenticated user from JWT."""
+    try:
+        payload = AuthService.decode_access_token(token)
+        user_email: str = payload.get("sub")
+        if not user_email:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+        user = await UserRepository.find_by_email(user_email)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return user
+    except:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication token")
 
-# Get all contributions
-@contributions_router.get("/contributions/")
-async def get_contributions():
-    contributions = await db["contributions"].find().to_list(100)
-    for contribution in contributions:
-        contribution["_id"] = str(contribution["_id"])
+@contributions_router.post("/{article_id}", status_code=status.HTTP_201_CREATED)
+async def log_contribution(article_id: str, action: str, current_user: dict = Depends(get_current_user)):
+    """Log a user's contribution (Only for existing articles)."""
+    article = await ArticleRepository.find_by_id(article_id)
+    if not article:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
+
+    contribution_id = await ContributionRepository.log_contribution(
+        user_id=str(current_user["_id"]),
+        article_id=article_id,
+        action=action
+    )
+    return {"id": str(contribution_id), "message": f"Contribution logged: {action}"}
+
+@contributions_router.get("/user/{user_id}", status_code=status.HTTP_200_OK)
+async def get_user_contributions(user_id: str):
+    """Retrieve all contributions made by a user."""
+    contributions = await ContributionRepository.get_contributions_by_user(user_id)
     return contributions
 
-# Get a single contribution by ID
-@contributions_router.get("/contributions/{contribution_id}")
-async def get_contribution(contribution_id: str):
-    contribution = await db["contributions"].find_one({"_id": ObjectId(contribution_id)})
-    if not contribution:
-        raise HTTPException(status_code=404, detail="Contribution not found")
-    contribution["_id"] = str(contribution["_id"])
-    return contribution
-
-# Update a contribution by ID
-@contributions_router.put("/contributions/{contribution_id}")
-async def update_contribution(contribution_id: str, contribution: Contribution):
-    contribution_data = contribution.dict(exclude_unset=True)
-    contribution_data["updated_at"] = datetime.now(timezone.utc)
-    result = await db["contributions"].update_one({"_id": ObjectId(contribution_id)}, {"$set": contribution_data})
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Contribution not found or no changes made")
-    return {"message": "Contribution updated successfully"}
-
-# Delete a contribution by ID
-@contributions_router.delete("/contributions/{contribution_id}")
-async def delete_contribution(contribution_id: str):
-    result = await db["contributions"].delete_one({"_id": ObjectId(contribution_id)})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Contribution not found")
-    return {"message": "Contribution deleted successfully"}
+@contributions_router.get("/article/{article_id}", status_code=status.HTTP_200_OK)
+async def get_article_contributions(article_id: str):
+    """Retrieve all contributions made on a specific article."""
+    contributions = await ContributionRepository.get_contributions_by_article(article_id)
+    return contributions

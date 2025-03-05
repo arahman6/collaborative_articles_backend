@@ -1,51 +1,77 @@
-from fastapi import APIRouter, HTTPException
-from app.database import db
-from app.models import Comment
-from datetime import datetime, timezone
-from bson import ObjectId
+from fastapi import APIRouter, HTTPException, Depends, status
+from app.database.comment_repository import CommentRepository
+from app.database.article_repository import ArticleRepository
+from app.database.user_repository import UserRepository
+from app.services.auth_service import AuthService
+from fastapi.security import OAuth2PasswordBearer
+from roles.role_factory import UserRoleFactory
 
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
 comments_router = APIRouter()
 
-# Create a new comment
-@comments_router.post("/comments/")
-async def add_comment(article_id: str, comment: Comment):
-    comment_data = comment.dict()
-    comment_data["article_id"] = article_id
-    comment_data["created_at"] = datetime.now(timezone.utc)
-    result = await db["comments"].insert_one(comment_data)
-    return {"id": str(result.inserted_id)}
+async def get_current_user(token: str = Depends(oauth2_scheme)):
+    """Retrieve the currently authenticated user from JWT."""
+    try:
+        payload = AuthService.decode_access_token(token)
+        user_email: str = payload.get("sub")
+        if not user_email:
+            raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication credentials")
+        user = await UserRepository.find_by_email(user_email)
+        if not user:
+            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="User not found")
+        return user
+    except:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication token")
 
-# Get all comments
-@comments_router.get("/comments/")
-async def get_comments():
-    comments = await db["comments"].find().to_list(100)
-    for comment in comments:
-        comment["_id"] = str(comment["_id"])
+@comments_router.post("/{article_id}", status_code=status.HTTP_201_CREATED)
+async def add_comment(article_id: str, content: str, current_user: dict = Depends(get_current_user)):
+    """Add a comment to an article."""
+    article = await ArticleRepository.find_by_id(article_id)
+    if not article:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
+
+    comment_id = await CommentRepository.add_comment(
+        article_id=article_id,
+        user_id=str(current_user["_id"]),
+        content=content
+    )
+    return {"id": str(comment_id), "message": "Comment added successfully"}
+
+@comments_router.get("/{article_id}", status_code=status.HTTP_200_OK)
+async def get_comments(article_id: str):
+    """Retrieve all comments for an article."""
+    comments = await CommentRepository.get_comments_by_article(article_id)
     return comments
 
-# Get a single comment by ID
-@comments_router.get("/comments/{comment_id}")
-async def get_comment(comment_id: str):
-    comment = await db["comments"].find_one({"_id": ObjectId(comment_id)})
+@comments_router.put("/{comment_id}", status_code=status.HTTP_200_OK)
+async def update_comment(comment_id: str, content: str, current_user: dict = Depends(get_current_user)):
+    """Update a comment (Only author can edit)."""
+    comment = await CommentRepository.find_comment_by_id(comment_id)
     if not comment:
-        raise HTTPException(status_code=404, detail="Comment not found")
-    comment["_id"] = str(comment["_id"])
-    return comment
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
 
-# Update a comment by ID
-@comments_router.put("/comments/{comment_id}")
-async def update_comment(comment_id: str, comment: Comment):
-    comment_data = comment.dict(exclude_unset=True)
-    comment_data["updated_at"] = datetime.now(timezone.utc)
-    result = await db["comments"].update_one({"_id": ObjectId(comment_id)}, {"$set": comment_data})
-    if result.modified_count == 0:
-        raise HTTPException(status_code=404, detail="Comment not found or no changes made")
+    if str(comment["user_id"]) != str(current_user["_id"]):
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You can only edit your own comments")
+
+    success = await CommentRepository.update_comment(comment_id, content)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to update comment")
+
     return {"message": "Comment updated successfully"}
 
-# Delete a comment by ID
-@comments_router.delete("/comments/{comment_id}")
-async def delete_comment(comment_id: str):
-    result = await db["comments"].delete_one({"_id": ObjectId(comment_id)})
-    if result.deleted_count == 0:
-        raise HTTPException(status_code=404, detail="Comment not found")
+@comments_router.delete("/{comment_id}", status_code=status.HTTP_200_OK)
+async def delete_comment(comment_id: str, current_user: dict = Depends(get_current_user)):
+    """Delete a comment (Admins can delete any comment, users can delete their own)."""
+    comment = await CommentRepository.find_comment_by_id(comment_id)
+    if not comment:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Comment not found")
+
+    user_role = UserRoleFactory.get_role(current_user["role"])
+    if str(comment["user_id"]) != str(current_user["_id"]) and not user_role.can_delete_articles():
+        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to delete this comment")
+
+    success = await CommentRepository.delete_comment(comment_id)
+    if not success:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to delete comment")
+
     return {"message": "Comment deleted successfully"}
