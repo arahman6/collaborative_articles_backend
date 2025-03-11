@@ -23,7 +23,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication token")
 
-@comments_router.post("/{article_id}", status_code=status.HTTP_201_CREATED)
+@comments_router.post("/articles/{article_id}/comment", status_code=status.HTTP_201_CREATED)
 async def add_comment(article_id: str, content: str, current_user: dict = Depends(get_current_user)):
     """Add a comment to an article."""
     article = await ArticleRepository.find_by_id(article_id)
@@ -37,13 +37,13 @@ async def add_comment(article_id: str, content: str, current_user: dict = Depend
     )
     return {"id": str(comment_id), "message": "Comment added successfully"}
 
-@comments_router.get("/{article_id}", status_code=status.HTTP_200_OK)
+@comments_router.get("/articles/{article_id}/comment", status_code=status.HTTP_200_OK)
 async def get_comments(article_id: str):
     """Retrieve all comments for an article."""
     comments = await CommentRepository.get_comments_by_article(article_id)
     return comments
 
-@comments_router.put("/{comment_id}", status_code=status.HTTP_200_OK)
+@comments_router.put("/comments/{comment_id}", status_code=status.HTTP_200_OK)
 async def update_comment(comment_id: str, content: str, current_user: dict = Depends(get_current_user)):
     """Update a comment (Only author can edit)."""
     comment = await CommentRepository.find_comment_by_id(comment_id)
@@ -59,7 +59,7 @@ async def update_comment(comment_id: str, content: str, current_user: dict = Dep
 
     return {"message": "Comment updated successfully"}
 
-@comments_router.delete("/{comment_id}", status_code=status.HTTP_200_OK)
+@comments_router.delete("/comments/{comment_id}", status_code=status.HTTP_200_OK)
 async def delete_comment(comment_id: str, current_user: dict = Depends(get_current_user)):
     """Delete a comment (Admins can delete any comment, users can delete their own)."""
     comment = await CommentRepository.find_comment_by_id(comment_id)

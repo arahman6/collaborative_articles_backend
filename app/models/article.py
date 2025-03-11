@@ -21,13 +21,8 @@ class Article(BaseModel):
     img: str
     tag: List[str] = []
     authors: List[AuthorModel] = []
+    created_at: Optional[str]
+    updated_at: Optional[str]
     class Config:
         populate_by_name = True
         json_encoders = {PyObjectId: str}
-        json_schema_extra = {
-            "example": {
-                "title": "The Future of AI",
-                "content": "AI is transforming the world...",
-                "tags": ["AI", "Technology"],
-            }
-        }

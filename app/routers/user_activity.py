@@ -22,7 +22,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication token")
 
-@user_activity_router.get("/user/{user_id}", status_code=status.HTTP_200_OK)
+@user_activity_router.get("/users/{user_id}", status_code=status.HTTP_200_OK)
 async def get_user_activity(user_id: str):
     """Retrieve all activity logs for a specific user."""
     activity_logs = await UserActivityRepository.get_user_activity(user_id)

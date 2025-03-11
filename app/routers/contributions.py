@@ -22,7 +22,7 @@ async def get_current_user(token: str = Depends(oauth2_scheme)):
     except:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid authentication token")
 
-@contributions_router.post("/{article_id}", status_code=status.HTTP_201_CREATED)
+@contributions_router.post("/articles/{article_id}/contribution", status_code=status.HTTP_201_CREATED)
 async def log_contribution(article_id: str, action: str, current_user: dict = Depends(get_current_user)):
     """Log a user's contribution (Only for existing articles)."""
     article = await ArticleRepository.find_by_id(article_id)
@@ -36,13 +36,13 @@ async def log_contribution(article_id: str, action: str, current_user: dict = De
     )
     return {"id": str(contribution_id), "message": f"Contribution logged: {action}"}
 
-@contributions_router.get("/user/{user_id}", status_code=status.HTTP_200_OK)
+@contributions_router.get("/users/{user_id}/contribution", status_code=status.HTTP_200_OK)
 async def get_user_contributions(user_id: str):
     """Retrieve all contributions made by a user."""
     contributions = await ContributionRepository.get_contributions_by_user(user_id)
     return contributions
 
-@contributions_router.get("/article/{article_id}", status_code=status.HTTP_200_OK)
+@contributions_router.get("/articles/{article_id}/contribution", status_code=status.HTTP_200_OK)
 async def get_article_contributions(article_id: str):
     """Retrieve all contributions made on a specific article."""
     contributions = await ContributionRepository.get_contributions_by_article(article_id)

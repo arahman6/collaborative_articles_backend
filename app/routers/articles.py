@@ -38,6 +38,13 @@ async def get_current_user_email(token: str = Depends(oauth2_scheme)):
     except:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 
+@articles_router.get("/", status_code=status.HTTP_200_OK)
+async def get_all_articles():
+    """Retrieve all articles."""
+    articles = await ArticleRepository.get_all_articles()
+    for article in articles:
+        article["_id"] = str(article["_id"])
+    return articles
 
 @articles_router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_article(article: Article, current_user: dict = Depends(get_current_user)):
@@ -66,6 +73,8 @@ async def get_article(article_id: str, current_user: dict = Depends(get_current_
     if not article:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Article not found")
 
+    article["_id"] = str(article["_id"])
+    
     # Log user activity
     await UserActivityRepository.log_activity(
         user_id=str(current_user["_id"]),
@@ -107,12 +116,6 @@ async def delete_article(article_id: str, current_user: dict = Depends(get_curre
         raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Failed to delete article")
 
     return {"message": "Article deleted successfully"}
-
-@articles_router.get("/", status_code=status.HTTP_200_OK)
-async def get_all_articles():
-    """Retrieve all articles."""
-    articles = await ArticleRepository.get_all_articles()
-    return articles
 
 @articles_router.post("/{article_id}/comment", status_code=status.HTTP_201_CREATED)
 async def add_comment(article_id: str, content: str, current_user: dict = Depends(get_current_user)):
