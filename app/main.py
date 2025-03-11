@@ -18,12 +18,6 @@ JWT_SECRET_KEY = get_secret()
 
 app = FastAPI()
 
-# # Enable CORS
-# origins = [
-#     "http://localhost:5173",  # React Dev Server
-#     "https://www.mining4insights.com",  # Production Frontend URL
-# ]
-
 # Enable CORS
 app.add_middleware(
     CORSMiddleware,

@@ -33,7 +33,7 @@ async def setup_test_user():
         "username": TEST_USER["username"],
         "email": TEST_USER["email"],
         "hashed_password": hashed_password,
-        "created_at": datetime.utcnow(),
+        "created_at": datetime.now(timezone.utc),
     }
     await db["users"].insert_one(user_data)
     yield user_data

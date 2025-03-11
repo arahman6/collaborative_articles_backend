@@ -1,6 +1,6 @@
 from app.database import db
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 class AdminRepository:
     """Handles admin actions like content moderation and user management."""
@@ -10,7 +10,7 @@ class AdminRepository:
         """Approve a submitted article."""
         update_result = await db["articles"].update_one(
             {"_id": ObjectId(article_id)},
-            {"$set": {"status": "approved", "updated_at": datetime.utcnow()}}
+            {"$set": {"status": "approved", "updated_at": datetime.now(timezone.utc)}}
         )
         return update_result.modified_count > 0
 
@@ -31,7 +31,7 @@ class AdminRepository:
         """Ban a user from the platform."""
         update_result = await db["users"].update_one(
             {"_id": ObjectId(user_id)},
-            {"$set": {"status": "banned", "updated_at": datetime.utcnow()}}
+            {"$set": {"status": "banned", "updated_at": datetime.now(timezone.utc)}}
         )
         return update_result.modified_count > 0
 
@@ -40,7 +40,7 @@ class AdminRepository:
         """Restore a banned user."""
         update_result = await db["users"].update_one(
             {"_id": ObjectId(user_id)},
-            {"$set": {"status": "active", "updated_at": datetime.utcnow()}}
+            {"$set": {"status": "active", "updated_at": datetime.now(timezone.utc)}}
         )
         return update_result.modified_count > 0
 

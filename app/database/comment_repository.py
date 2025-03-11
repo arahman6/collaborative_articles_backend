@@ -1,6 +1,6 @@
 from app.database import db
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 class CommentRepository:
     """Handles all database operations related to comments."""
@@ -12,8 +12,8 @@ class CommentRepository:
             "article_id": ObjectId(article_id),
             "user_id": ObjectId(user_id),
             "content": content,
-            "created_at": datetime.utcnow(),
-            "updated_at": datetime.utcnow()
+            "created_at": datetime.now(timezone.utc),
+            "updated_at": datetime.now(timezone.utc)
         }
         result = await db["comments"].insert_one(comment_data)
         return result.inserted_id
@@ -28,7 +28,7 @@ class CommentRepository:
         """Update an existing comment."""
         update_result = await db["comments"].update_one(
             {"_id": ObjectId(comment_id)},
-            {"$set": {"content": content, "updated_at": datetime.utcnow()}}
+            {"$set": {"content": content, "updated_at": datetime.now(timezone.utc)}}
         )
         return update_result.modified_count > 0  # True if updated successfully
 

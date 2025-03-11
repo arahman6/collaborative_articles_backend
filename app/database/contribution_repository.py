@@ -1,6 +1,6 @@
 from app.database import db
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 class ContributionRepository:
     """Handles all database operations related to contributions."""
@@ -12,7 +12,7 @@ class ContributionRepository:
             "user_id": ObjectId(user_id),
             "article_id": ObjectId(article_id),
             "action": action,  # 'created', 'edited'
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
         result = await db["contributions"].insert_one(contribution_data)
         return result.inserted_id

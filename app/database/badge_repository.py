@@ -1,6 +1,6 @@
 from app.database import db
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 class BadgeRepository:
     """Handles user badge assignments based on engagement metrics."""
@@ -39,7 +39,7 @@ class BadgeRepository:
         # Store assigned badges
         await db["badges"].update_one(
             {"user_id": ObjectId(user_id)},
-            {"$set": {"badges": new_badges, "updated_at": datetime.utcnow()}},
+            {"$set": {"badges": new_badges, "updated_at": datetime.now(timezone.utc)}},
             upsert=True
         )
         return new_badges

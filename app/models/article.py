@@ -1,15 +1,7 @@
 from pydantic import BaseModel, Field
 from typing import List, Optional
 from app.models.base import PyObjectId
-
-# class Article(BaseModel):
-#     id: PyObjectId = Field(default_factory=PyObjectId, alias="_id")
-#     title: str
-#     content: str
-#     tags: List[str]
-#     created_at: Optional[str]
-#     updated_at: Optional[str]
-
+from datetime import datetime, timezone
 class AuthorModel(BaseModel):
     name: str
     avatar: str
@@ -21,8 +13,8 @@ class Article(BaseModel):
     img: str
     tag: List[str] = []
     authors: List[AuthorModel] = []
-    created_at: Optional[str]
-    updated_at: Optional[str]
+    created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+    updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     class Config:
         populate_by_name = True
         json_encoders = {PyObjectId: str}

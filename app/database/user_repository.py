@@ -1,6 +1,6 @@
 from app.database import db
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 class UserRepository:
     """Handles all user-related database interactions."""
@@ -18,7 +18,7 @@ class UserRepository:
     @staticmethod
     async def create_user(user_data: dict):
         """Insert a new user into the database."""
-        user_data["created_at"] = datetime.utcnow()
+        user_data["created_at"] = datetime.now(timezone.utc)
         result = await db["users"].insert_one(user_data)
         return result.inserted_id
 
@@ -42,6 +42,6 @@ class UserRepository:
         """Update a user's password."""
         update_result = await db["users"].update_one(
             {"_id": ObjectId(user_id)},
-            {"$set": {"hashed_password": new_hashed_password, "updated_at": datetime.utcnow()}}
+            {"$set": {"hashed_password": new_hashed_password, "updated_at": datetime.now(timezone.utc)}}
         )
         return update_result.modified_count > 0

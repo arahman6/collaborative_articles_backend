@@ -1,6 +1,6 @@
 from app.database import db
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 class UserActivityRepository:
     """Handles all database operations related to user activity logging."""
@@ -12,7 +12,7 @@ class UserActivityRepository:
             "user_id": ObjectId(user_id),
             "action": action,  # Example: "viewed_article", "commented", "liked"
             "metadata": metadata or {},  # Additional details (e.g., article_id)
-            "timestamp": datetime.utcnow()
+            "timestamp": datetime.now(timezone.utc)
         }
         result = await db["user_activity"].insert_one(activity_data)
         return result.inserted_id

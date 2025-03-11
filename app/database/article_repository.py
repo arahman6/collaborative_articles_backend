@@ -1,6 +1,6 @@
 from app.database import db
 from bson import ObjectId
-from datetime import datetime
+from datetime import datetime, timezone
 
 class ArticleRepository:
     """Handles all database operations related to articles."""
@@ -8,8 +8,8 @@ class ArticleRepository:
     @staticmethod
     async def create_article(article_data: dict):
         """Insert a new article into the database."""
-        article_data["created_at"] = datetime.utcnow()
-        article_data["updated_at"] = datetime.utcnow()
+        article_data["created_at"] = datetime.now(timezone.utc)
+        article_data["updated_at"] = datetime.now(timezone.utc)
         result = await db["articles"].insert_one(article_data)
         return result.inserted_id
 
