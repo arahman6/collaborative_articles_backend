@@ -1,7 +1,7 @@
 ### Get All Articles with Stored Token
-GET http://127.0.0.1:8000/api/v1/
+GET http://127.0.0.1:8000/api/v1/articles/
 Content-Type: application/json
-Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqb2huZG9lQGV4YW1wbGUuY29tIiwiZXhwIjoxNzQxMTcxNTgwfQ.vnd7_7QCD2RU4iRxnVLeqtPYI6dRWBEOWn-XOceCizQ
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqb2huZG9lQGV4YW1wbGUuY29tIiwiZXhwIjoxNzQxNjYzMTk3fQ.HV8M8tNwMfiIF5tQ5KbVnXeWZKw8Nxe9i47nJFZ1b1E
 
 
 ###
