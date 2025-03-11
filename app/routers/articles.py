@@ -38,7 +38,7 @@ async def get_current_user_email(token: str = Depends(oauth2_scheme)):
     except:
         raise HTTPException(status_code=401, detail="Invalid authentication token")
 
-@articles_router.get("/", status_code=status.HTTP_200_OK)
+@articles_router.get("/", status_code=status.HTTP_200_OK, tags=["Articles"])
 async def get_all_articles():
     """Retrieve all articles."""
     articles = await ArticleRepository.get_all_articles()
@@ -46,7 +46,7 @@ async def get_all_articles():
         article["_id"] = str(article["_id"])
     return articles
 
-@articles_router.post("/", status_code=status.HTTP_201_CREATED)
+@articles_router.post("/", status_code=status.HTTP_201_CREATED, tags=["Articles"])
 async def create_article(article: Article, current_user: dict = Depends(get_current_user)):
     """Create a new article (Only Admins & Contributors)."""
     user_role = UserRoleFactory.get_role(current_user["role"])
@@ -66,7 +66,7 @@ async def create_article(article: Article, current_user: dict = Depends(get_curr
 
     return {"id": str(article_id), "message": "Article created successfully"}
 
-@articles_router.get("/{article_id}", status_code=status.HTTP_200_OK)
+@articles_router.get("/{article_id}", status_code=status.HTTP_200_OK, tags=["Articles"])
 async def get_article(article_id: str, current_user: dict = Depends(get_current_user)):
     """Retrieve an article and log that the user viewed it."""
     article = await ArticleRepository.find_by_id(article_id)
@@ -84,7 +84,7 @@ async def get_article(article_id: str, current_user: dict = Depends(get_current_
 
     return article
 
-@articles_router.put("/{article_id}", status_code=status.HTTP_200_OK)
+@articles_router.put("/{article_id}", status_code=status.HTTP_200_OK, tags=["Articles"])
 async def update_article(article_id: str, update_data: dict, current_user: dict = Depends(get_current_user)):
     """Update an article (Only Admins & Contributors)."""
     user_role = UserRoleFactory.get_role(current_user["role"])
@@ -104,7 +104,7 @@ async def update_article(article_id: str, update_data: dict, current_user: dict 
 
     return {"message": "Article updated successfully"}
 
-@articles_router.delete("/{article_id}", status_code=status.HTTP_200_OK)
+@articles_router.delete("/{article_id}", status_code=status.HTTP_200_OK, tags=["Articles"])
 async def delete_article(article_id: str, current_user: dict = Depends(get_current_user)):
     """Delete an article (Only Admins)."""
     user_role = UserRoleFactory.get_role(current_user["role"])
@@ -117,7 +117,7 @@ async def delete_article(article_id: str, current_user: dict = Depends(get_curre
 
     return {"message": "Article deleted successfully"}
 
-@articles_router.post("/{article_id}/comment", status_code=status.HTTP_201_CREATED)
+@articles_router.post("/{article_id}/comment", status_code=status.HTTP_201_CREATED, tags=["Articles"])
 async def add_comment(article_id: str, content: str, current_user: dict = Depends(get_current_user)):
     """Add a comment and notify the article author."""
     article = await ArticleRepository.find_by_id(article_id)
@@ -137,7 +137,7 @@ async def add_comment(article_id: str, content: str, current_user: dict = Depend
 
     return {"id": str(comment_id), "message": "Comment added successfully"}
 
-@articles_router.post("/generate/", status_code=201)
+@articles_router.post("/generate/", status_code=201, tags=["Articles"])
 async def generate_articles(current_user: dict = Depends(get_current_user)):
     """Generates AI articles (Only Admins)."""
     user_role = UserRoleFactory.get_role(current_user["role"])
