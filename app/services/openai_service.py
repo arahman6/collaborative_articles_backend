@@ -3,8 +3,12 @@ from app.config import config
 
 openai.api_key = config.OPENAI_API_KEY
 
-async def generate_article(sector):
-    prompt = f"Write a detailed news article about the latest trends in {sector}. It should be insightful and engaging."
+async def generate_article(sector, word_count=500, tone="insightful and engaging"):
+    """Generates an AI-written article for a given sector using OpenAI API."""
+    prompt = (
+        f"Write a detailed news article about the latest trends in {sector}. "
+        f"Make it {word_count} words long and ensure it is {tone}."
+    )
 
     response = openai.chat.completions.create(
         messages=[
@@ -13,6 +17,5 @@ async def generate_article(sector):
         ],
         model="gpt-4o",
     )
-    print('response: ', response.choices[0].message.content)
 
     return response.choices[0].message.content

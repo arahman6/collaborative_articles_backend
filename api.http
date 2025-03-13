@@ -1,0 +1,130 @@
+### Get All Articles with Stored Token
+GET http://127.0.0.1:8000/api/v1/articles/
+Content-Type: application/json
+Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJqb2huZG9lQGV4YW1wbGUuY29tIiwiZXhwIjoxNzQxNjcwNTMwfQ.TEXX_xuOUbTL_nR_tUDG1gwIg-022O5edjENf57uEuE
+
+
+###
+# Create a new user
+POST http://127.0.0.1:8000/api/v1/users/signup/
+Content-Type: application/json
+
+{
+    "username": "johndoe11",
+    "email": "johndoe11@example.com",
+    "password": "SecurePass123"
+}
+
+### Login and Save Token
+POST http://127.0.0.1:8000/api/v1/users/login/
+Content-Type: application/x-www-form-urlencoded
+
+username=johndoe@example.com&password=SecurePass123
+
+#######################
+
+
+
+###  1. Create a New User (Signup)
+POST http://127.0.0.1:8000/api/v1/users/signup/
+Content-Type: application/json
+
+{
+    "username": "johndoe",
+    "email": "johndoe@example.com",
+    "password": "SecurePass123"
+}
+
+###  2. Login and Get JWT Token
+### Login Request
+POST http://127.0.0.1:8000/api/v1/users/login/
+Content-Type: application/x-www-form-urlencoded
+
+username=johndoe@example.com&password=SecurePass123
+
+### Request with token
+GET http://127.0.0.1:8000/api/v1/users/profile/
+Authorization: Bearer {{login.response.body.access_token}}
+
+###  3. Retrieve User Profile (Requires Auth)
+GET http://127.0.0.1:8000/api/v1/users/profile/
+Authorization: Bearer {{login.response.body.access_token}}
+
+###
+
+###  4. Update User Profile (Requires Auth)
+PUT http://127.0.0.1:8000/api/v1/users/profile/
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+    "bio": "Updated bio for John Doe.",
+    "profile_picture": "https://example.com/profile.jpg"
+}
+
+###
+
+###  5. Change Password (Requires Auth)
+PUT http://127.0.0.1:8000/api/v1/users/change-password/
+Content-Type: application/json
+Authorization: Bearer {{auth_token}}
+
+{
+    "old_password": "SecurePass123",
+    "new_password": "NewSecurePass123"
+}
+
+###
+
+###  6. Delete Account (If Exists, Requires Auth)
+DELETE http://127.0.0.1:8000/api/v1/users/delete-account/
+Authorization: Bearer {{auth_token}}
+
+###
+
+###  7. Create an Admin User
+POST http://127.0.0.1:8000/api/v1/users/signup/
+Content-Type: application/json
+
+{
+    "username": "adminuser",
+    "email": "admin@example.com",
+    "password": "AdminPass123",
+    "role": "Admin"
+}
+
+###
+
+###  8. Login as Admin
+POST http://127.0.0.1:8000/api/v1/users/login/
+Content-Type: application/x-www-form-urlencoded
+
+username=admin@example.com&password=AdminPass123
+
+> {%
+    client.global.set("admin_token", response.body.access_token);
+%}
+
+###
+
+###  9. Admin: Manage Users (Requires Admin Auth)
+GET http://127.0.0.1:8000/api/v1/users/manage-users/
+Authorization: Bearer {{admin_token}}
+
+###
+
+###  10. Admin: Ban a User
+POST http://127.0.0.1:8000/api/v1/admin/ban-user/{{user_id}}
+Authorization: Bearer {{admin_token}}
+
+###
+
+###  11. Admin: Restore a Banned User
+POST http://127.0.0.1:8000/api/v1/admin/restore-user/{{user_id}}
+Authorization: Bearer {{admin_token}}
+
+
+
+
+
+
