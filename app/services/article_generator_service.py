@@ -13,19 +13,20 @@ class ArticleGeneratorService:
         new_articles = []
 
         for sector in config.SECTORS:
-            content = await generate_article(sector)
-            print('Generated content: ', content)
+            for subsector in sector["subsectors"]:
+                content = await generate_article(sector, subsector)
+                print('Generated content: ', content)
 
-            article_data = {
-                "title": content.split("\n\n")[0].strip("*"),
-                "description": "\n\n".join(content.split("\n\n")[1:]),  # Content becomes 'description'
-                "tags": [sector], 
-                "img": f"https://picsum.photos/800/450?{sector}",  # Added a default image
-                "authors": ['AI'],
-                "created_at": now,
-                "updated_at": now
-            }
-            new_articles.append(article_data)
+                article_data = {
+                    "title": content.split("\n\n")[0].strip("*"),
+                    "description": "\n\n".join(content.split("\n\n")[1:]), 
+                    "tags": [sector["sector"], subsector] + sector["keywords"], 
+                    "img": f"https://picsum.photos/800/450?{sector['sector']}", 
+                    "authors": ['AI'],
+                    "created_at": now,
+                    "updated_at": now
+                }
+                new_articles.append(article_data)
 
         await ArticleRepository.bulk_insert_articles(new_articles)
         return {"message": "Articles generated successfully!"}
