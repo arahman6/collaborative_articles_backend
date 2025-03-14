@@ -1,6 +1,6 @@
 # This file contains the Pydantic models for User, UserContact, UserProfessional, UserEngagement, and UserPreferences
 
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr, Field, field_validator
 from app.models.base import PyObjectId
 from typing import Optional, List, Dict
 from datetime import datetime, timezone
@@ -16,6 +16,22 @@ class User(BaseModel):
     status: str = "active"  # Account status
     created_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
     updated_at: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+
+
+    @field_validator("profile_picture", mode="before")
+    def generate_avatar(cls, value, values):
+        """Generate avatar from initials if no profile picture is provided."""
+        if value:
+            return value 
+        username = values.get("username", "")
+        if username:
+            name_parts = username.split()
+            initials = "".join([part[0].upper() for part in name_parts[:2]]) 
+            return f"https://ui-avatars.com/api/?name={initials}&bold=true"
+        else:
+            return f"https://ui-avatars.com/api/?name=UN&bold=true"
+
+
 
     class Config:
         populate_by_name = True
