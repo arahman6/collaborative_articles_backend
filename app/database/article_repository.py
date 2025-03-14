@@ -47,4 +47,4 @@ class ArticleRepository:
     @staticmethod
     async def get_all_articles():
         """Retrieve all articles."""
-        return await db["articles"].find().to_list(length=100)
+        return await db["articles"].find().sort("created_at", -1).to_list(length=100)
