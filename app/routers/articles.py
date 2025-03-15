@@ -54,7 +54,7 @@ async def create_article(article: Article, current_user: dict = Depends(get_curr
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="You do not have permission to create articles")
 
     article_data = article.model_dump()
-    article_data["author_id"] = str(current_user["_id"])
+    article_data["authors"] = str(current_user["_id"])
     article_id = await ArticleRepository.create_article(article_data)
 
     # Automatically Log Contribution
@@ -131,9 +131,9 @@ async def add_comment(article_id: str, content: str, current_user: dict = Depend
     )
 
     # Notify the author
-    author = await UserRepository.find_by_id(str(article["author_id"]))
-    if author:
-        print(f"Notification: {author['email']} - Your article has a new comment!")
+    # author = await UserRepository.find_by_id(str(article["authors"]))
+    # if author:
+    #     print(f"Notification: {author['email']} - Your article has a new comment!")
 
     return {"id": str(comment_id), "message": "Comment added successfully"}
 
