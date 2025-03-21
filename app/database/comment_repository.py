@@ -19,9 +19,18 @@ class CommentRepository:
         return result.inserted_id
 
     @staticmethod
-    async def get_comments_by_article(article_id: str):
+    async def get_comments_by_article(article_id: str) -> list:
         """Retrieve all comments for a specific article."""
-        return await db["comments"].find({"article_id": ObjectId(article_id)}).to_list(length=100)
+
+        query = {"article_id": ObjectId(article_id)}
+        comments = []
+        async for comment in db["comments"].find(query):
+            # Convert ObjectId to string for relevant fields
+            comment["_id"] = str(comment["_id"])
+            comment["user_id"] = str(comment["user_id"])
+            comment["article_id"] = str(comment["article_id"])
+            comments.append(comment)
+        return comments[:100]
 
     @staticmethod
     async def update_comment(comment_id: str, content: str):

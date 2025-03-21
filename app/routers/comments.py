@@ -38,9 +38,11 @@ async def add_comment(article_id: str, content: str, current_user: dict = Depend
     return {"id": str(comment_id), "message": "Comment added successfully"}
 
 @comments_router.get("/articles/{article_id}/comment", status_code=status.HTTP_200_OK)
-async def get_comments(article_id: str):
+async def get_comments(article_id: str) -> list:
     """Retrieve all comments for an article."""
+    print("article_id", article_id)
     comments = await CommentRepository.get_comments_by_article(article_id)
+    print("comments", type(comments))
     return comments
 
 @comments_router.put("/comments/{comment_id}", status_code=status.HTTP_200_OK)
