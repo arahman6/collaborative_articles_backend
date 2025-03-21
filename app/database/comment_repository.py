@@ -29,6 +29,18 @@ class CommentRepository:
             comment["_id"] = str(comment["_id"])
             comment["user_id"] = str(comment["user_id"])
             comment["article_id"] = str(comment["article_id"])
+            # Fetch user info for the comment's user_id
+            user = await db["users"].find_one({"_id": ObjectId(comment["user_id"])})
+            if user:
+                comment["user"] = {
+                    "username": user.get("username"),
+                    "profile_picture": user.get("profile_picture")
+                }
+            else:
+                comment["user"] = {
+                    "username": "Unknown User",
+                    "profile_picture": None
+                }
             comments.append(comment)
         return comments[:100]
 
